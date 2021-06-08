@@ -22,8 +22,6 @@ app.get('/', function(req, res){ res.sendFile(__dirname + '/index.html'); });
 server.on('request', app);
 
 // Retrieve invoice list
-
-
 app.post('/list', jsonParser, function(request, response){
 
 	var {lnd} = lnService.authenticatedLndGrpc({
@@ -31,14 +29,12 @@ app.post('/list', jsonParser, function(request, response){
 		macaroon: keys['macaroon'],
 		socket: '127.0.0.1:10009',
 	});
-	
+
 	lnService.getInvoices({lnd}, (err, invoices) => {
 			response.json(invoices);
 	});
 
 });
-
-
 
 // Retrieve credentials via environment or from key file
 let keys;
@@ -68,7 +64,7 @@ if (TALLYCOIN_APIKEY && LND_TLSCERT_PATH && LND_MACAROON_PATH) {
 
 // start connection to Tallycoin server
 
-start_websocket(); 
+start_websocket();
 
 // Start on port 8123
 
@@ -93,7 +89,7 @@ function start_websocket(){
 	console.log('starting websocket');
 
 	clearInterval(wstimer);
-	ws = new WebSocket('wss://ws.tallycoin.app:8123/'); 
+	ws = new WebSocket('wss://ws.tallycoin.app:8123/');
 	var restarting;
 
 	// send setup message and API key every 20 seconds to keep a live connection
@@ -103,8 +99,8 @@ function start_websocket(){
 
 		ws.send(JSON.stringify({ "setup": keys['tallycoin_api'] }));
 
-		wstimer = setInterval(function(){ 
-			if(ws.readyState == 1){ 
+		wstimer = setInterval(function(){
+			if(ws.readyState == 1){
 					ws.send(JSON.stringify({ "ping": keys['tallycoin_api'] }));
 			}
 		}, 20000);
@@ -122,17 +118,17 @@ function start_websocket(){
 
 	ws.on('close', function close(e) {
 		clearInterval(wstimer);
-		if(restarting != 'Y'){  
+		if(restarting != 'Y'){
 			restarting = 'Y';
-			console.log('close websocket'); 
+			console.log('close websocket');
 			setTimeout(function(){ start_websocket(); }, 10000);
 		}
 	});
 
 	ws.on('error', function error(e) {
 		clearInterval(wstimer);
-		if(restarting != 'Y'){ 
-			restarting = 'Y'; 
+		if(restarting != 'Y'){
+			restarting = 'Y';
 			setTimeout(function(){ start_websocket(); }, 10000);
 		}
 	});
